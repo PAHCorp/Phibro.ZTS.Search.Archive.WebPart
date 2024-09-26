@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './PhibroZtsSearchCenterApp.module.scss';
 import type { IPhibroZtsSearchCenterAppProps } from './IPhibroZtsSearchCenterAppProps';
 import { SearchBox } from '@fluentui/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SPFI } from '@pnp/sp';
 import { getSP } from '../../../pnpConfig';
 import { IDECCOX_Binder_6_Percent, IDeccox_Export_Full_Source } from '../../../interfaces';
@@ -11,7 +11,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
   let _sp:SPFI | null = getSP(props.context);
 
-  const [searchQuery, _] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [documents, setDocuments] = useState<any[]>([]);
 
@@ -51,14 +51,13 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     }
   }
 
-  useEffect(() => {
+  const handleSearchInputChange = (event: any) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleKeyDown = () => {
     getItem();
-  }, [searchQuery])
-
-
-  // const handleKeyDown = () => {
-  //   getItem();
-  // };
+  };
 
 
   return (
@@ -74,9 +73,10 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
         <div>
           <SearchBox
           id='searchBoxValue'
+          onChange={handleSearchInputChange}
           placeholder='Search...'
           />
-          <button onClick={()=>console.log("clicked")}>Search</button>
+          <button onClick={handleKeyDown}>Search</button>
         </div>
         <ul className={styles['document-list']}>
         {documents && documents.map((item) => (
