@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.20.3",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.19.0",
+    "libraryName": "phibro-zts-search-center-app",
+    "libraryId": "1dcd1ae1-be2b-45bd-91ca-6e7086676e53",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "Phibro-ZTS-Search-Center-App",
+    "solutionShortDescription": "Phibro-ZTS-Search-Center-App description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

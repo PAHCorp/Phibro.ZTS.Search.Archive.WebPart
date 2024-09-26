@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "phibro-zts-search-center-app-client-side-solution",
+    "id": "1dcd1ae1-be2b-45bd-91ca-6e7086676e53",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "Phibro-ZTS-Search-Center-App description"
+      },
+      "longDescription": {
+        "default": "Phibro-ZTS-Search-Center-App description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "phibro-zts-search-center-app Feature",
+        "description": "The feature that activates elements of the phibro-zts-search-center-app solution.",
+        "id": "d40b621b-dddb-4df5-9f75-4d6f9ae12c38",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/phibro-zts-search-center-app.sppkg"
+  }
+}
