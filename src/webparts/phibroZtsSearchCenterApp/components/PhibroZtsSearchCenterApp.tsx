@@ -34,7 +34,6 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev")
             .top(2000)()
         ]);
-        console.log(fetchedExportData);
         // Set the fetched data to state
         setBinderData(fetchedBinderData);
         setExportData(fetchedExportData);
@@ -48,7 +47,9 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
   const getItem = async () => {
     try {
-      // Prepare the search words set (case-insensitive)
+      let tempBinderData = binderData.map(item=>item);
+      let tempExportData = exportData.map(item=>item);
+      // Prepare the search words set (case-insensitive)2az
       const wordsSet = new Set(
         searchQuery
           .split(" ")
@@ -58,7 +59,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       const wordsArray = Array.from(wordsSet);
   
       // Filter data based on search words
-      const filteredData = binderData?.filter(item => {
+      const filteredData = tempBinderData?.filter(item => {
         const fieldValue = item.field_2?.toLowerCase() || "";
         for (let word of wordsArray) {
           if (fieldValue.includes(word)) {
@@ -70,12 +71,9 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
   
       // Create a Set of unique IDs from filtered data
       const idSet = new Set(filteredData?.map(item => item.field_3) || []);
-      console.log(`Unique IDs:`, idSet);
-
   
       // Filter the full data based on idSet
-      const filteredFullData = exportData?.filter(item => idSet.has(item.Title));
-      console.log(`Filtered Full Data:`, filteredFullData);
+      const filteredFullData = tempExportData?.filter(item => idSet.has(item.Title));
   
       // Update the state with the filtered documents
       setDocuments(filteredFullData || []);
