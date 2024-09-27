@@ -1,48 +1,67 @@
 import * as React from 'react';
 import styles from './PhibroZtsSearchCenterApp.module.scss';
 import type { IPhibroZtsSearchCenterAppProps } from './IPhibroZtsSearchCenterAppProps';
-import { SearchBox } from '@fluentui/react';
-import { useState } from 'react';
+import { SearchBox } from '@fluentui/react-components';
+import { useState, useEffect } from 'react';
 import { SPFI } from '@pnp/sp';
 import { getSP } from '../../../pnpConfig';
 import { IDECCOX_Binder_6_Percent, IDeccox_Export_Full_Source } from '../../../interfaces';
+import DocumentList from './DocumentList';
 
 const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (props: IPhibroZtsSearchCenterAppProps) => {
 
-  let _sp:SPFI | null = getSP(props.context);
-
+  // let _sp:SPFI | null = getSP(props.context);
+  const [_sp, _] = useState<SPFI | null>(getSP(props.context));
   const [searchQuery, setSearchQuery] = useState("");
 
   const [documents, setDocuments] = useState<any[]>([]);
 
+  const [binderData, setBinderData] = useState<IDECCOX_Binder_6_Percent[]>([]);
+  const [exportData, setExportData] = useState<IDeccox_Export_Full_Source[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!_sp) return; // Ensure _sp is available before fetching
+
+      try {
+        const [fetchedBinderData, fetchedExportData] = await Promise.all([
+          _sp.web.lists
+            .getByTitle("DECCOX Binder 6 Percent")
+            .items.select("field_1", "field_2", "field_3", "field_4")
+            .top(2000)(),
+          _sp.web.lists
+            .getByTitle("Deccox Export Full Source")
+            .items.select("Title", "file")
+            .top(2000)()
+        ]);
+        console.log(fetchedExportData);
+        // Set the fetched data to state
+        setBinderData(fetchedBinderData);
+        setExportData(fetchedExportData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData(); // Call the fetch function
+  }, [_sp]); // Dependency array includes _sp to re-run if it changes
+
   const getItem = async () => {
     try {
-      // Fetch both lists concurrently with only necessary fields
-      const [data, fullData] = await Promise.all([
-        _sp?.web.lists
-          .getByTitle("DECCOX Binder 6 Percent")
-          .items.select("field_1", "field_2", "field_3", "field_4")
-          .top(2000)(),
-        _sp?.web.lists
-          .getByTitle("Deccox Export Full Source")
-          .items.select("Title", "file")
-          .top(2000)()
-      ]);
-  
-      console.log(`Fetched ${data?.length} items from DECCOX Binder 6 Percent`);
+      console.log(`Fetched ${binderData?.length} items from DECCOX Binder 6 Percent`);
   
       // Map the necessary fields
-      const newdata = data?.map((i: IDECCOX_Binder_6_Percent) => [
+      const newdata = binderData?.map((i: IDECCOX_Binder_6_Percent) => [
         i.field_1,
         i.field_2,
         i.field_3,
         i.field_4
       ]);
 
-      const past_data = fullData?.map((i: IDeccox_Export_Full_Source) => {
+      const past_data = exportData?.map((i: IDeccox_Export_Full_Source) => [
         i.Title,
         i.file
-      });
+      ]);
       console.log(past_data);
   
       // Prepare the search words set (case-insensitive)
@@ -52,8 +71,6 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
           .map(word => word.trim().toLowerCase())
           .filter(word => word.length > 0) // Remove empty strings
       );
-      console.log(newdata);
-      console.log(wordsSet);
       const wordsArray = Array.from(wordsSet);
   
       // Filter data based on search words
@@ -70,19 +87,14 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       // Create a Set of unique IDs from filtered data
       const idSet = new Set(filteredData?.map(item => item[2]) || []);
       console.log(`Unique IDs:`, idSet);
-  
-      // Map the full data
-      const newFullData = fullData?.map((i: IDeccox_Export_Full_Source) => [
-        i.Title,
-        i.file
-      ]);
+
   
       // Filter the full data based on idSet
-      const filteredFullData = newFullData?.filter(item => idSet.has(item[0]));
+      const filteredFullData = past_data?.filter(item => idSet.has(item[0]));
       console.log(`Filtered Full Data:`, filteredFullData);
   
       // Update the state with the filtered documents
-      setDocuments(filteredData || []);
+      setDocuments(filteredFullData || []);
     } catch (err) {
       console.error("Error fetching and processing data:", err);
     }
@@ -93,8 +105,11 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     setSearchQuery(event.target.value);
   };
 
-  const handleKeyDown = () => {
-    getItem();
+  const handleKeyDown = (event: { key: string; preventDefault: () => void; }) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      getItem();
+    }
   };
 
 
@@ -112,13 +127,15 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
           <SearchBox
           id='searchBoxValue'
           onChange={handleSearchInputChange}
+          onKeyDown={handleKeyDown}
           placeholder='Search...'
           />
-          <button onClick={handleKeyDown}>Search</button>
+          <button onClick={getItem}>Search</button>
         </div>
         <ul className={styles['document-list']}>
-        {documents && documents.map((item) => (
-          <li>{item}</li> ))}
+        {documents &&
+        <DocumentList docs={documents} />
+        }
         </ul>
       </div>
     </div>

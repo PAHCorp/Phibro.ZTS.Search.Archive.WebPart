@@ -125,3 +125,32 @@
   padding: 9px 28px 3px;
   position: relative;
 }
+
+.document-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.document-item {
+  margin-bottom: 10px;
+}
+
+.document-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arrow-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em; /* Adjust size */
+}
+
+.additional-details {
+  margin-top: 5px;
+  padding: 10px;
+  background-color: #f9f9f9; /* Optional background */
+  border: 1px solid #ddd; /* Optional border */
+}
