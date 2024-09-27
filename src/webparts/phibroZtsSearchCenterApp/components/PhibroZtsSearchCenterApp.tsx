@@ -133,11 +133,11 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
           />
           <button onClick={getItem} style={{ padding: '8px 16px'}} >Search</button>
         </div>
-        <ul className={styles['document-list']}>
+        {/* <ul className={styles['document-list']}> */}
         {documents &&
         <DocumentList docs={documents} />
         }
-        </ul>
+        {/* </ul> */}
       </div>
     </div>
   )

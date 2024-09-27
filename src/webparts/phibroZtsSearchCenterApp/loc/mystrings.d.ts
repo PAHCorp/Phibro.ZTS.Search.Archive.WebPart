@@ -17,3 +17,8 @@ declare module 'PhibroZtsSearchCenterAppWebPartStrings' {
   const strings: IPhibroZtsSearchCenterAppWebPartStrings;
   export = strings;
 }
+
+declare module '*.module.css' {
+  const classes: { [key: string]: string };
+  export default classes;
+}
