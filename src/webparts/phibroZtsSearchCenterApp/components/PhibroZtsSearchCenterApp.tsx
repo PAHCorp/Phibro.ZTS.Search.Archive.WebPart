@@ -17,39 +17,77 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
   const getItem = async () => {
     try {
-      const data = await _sp?.web.lists.getByTitle("DECCOX Binder 6 Percent").items.top(2000)();
-      console.log(data?.length);
-      const newdata = data?.map((i: IDECCOX_Binder_6_Percent) => [i.field_1, i.field_2, i.field_3, i.field_4]);
-      const wordsArray = searchQuery.split(" ");
-      const wordsSet = new Set(wordsArray);
-      const filteredData = newdata?.filter((item) => {
-        for (let i = 0; i < item[1].length; i++) {
-          for (let j = i; j < item[1].length; j++) {
-            if (wordsSet.has(item[1].slice(i, j+1))) {
-              return true;
-            }
+      // Fetch both lists concurrently with only necessary fields
+      const [data, fullData] = await Promise.all([
+        _sp?.web.lists
+          .getByTitle("DECCOX Binder 6 Percent")
+          .items.select("field_1", "field_2", "field_3", "field_4")
+          .top(2000)(),
+        _sp?.web.lists
+          .getByTitle("Deccox Export Full Source")
+          .items.select("Title", "file")
+          .top(2000)()
+      ]);
+  
+      console.log(`Fetched ${data?.length} items from DECCOX Binder 6 Percent`);
+  
+      // Map the necessary fields
+      const newdata = data?.map((i: IDECCOX_Binder_6_Percent) => [
+        i.field_1,
+        i.field_2,
+        i.field_3,
+        i.field_4
+      ]);
+
+      const past_data = fullData?.map((i: IDeccox_Export_Full_Source) => {
+        i.Title,
+        i.file
+      });
+      console.log(past_data);
+  
+      // Prepare the search words set (case-insensitive)
+      const wordsSet = new Set(
+        searchQuery
+          .split(" ")
+          .map(word => word.trim().toLowerCase())
+          .filter(word => word.length > 0) // Remove empty strings
+      );
+      console.log(newdata);
+      console.log(wordsSet);
+      const wordsArray = Array.from(wordsSet);
+  
+      // Filter data based on search words
+      const filteredData = newdata?.filter(item => {
+        const fieldValue = item[1]?.toLowerCase() || "";
+        for (let word of wordsArray) {
+          if (fieldValue.includes(word)) {
+            return true;
           }
         }
         return false;
       });
-      const idSet = new Set();
-      if (filteredData){
-        for (let i = 0; i < filteredData?.length; i++) {
-          if (!(idSet.has(filteredData[i][2]))) {
-            idSet.add(filteredData[i][2]);
-          }
-        }
-      }
-      console.log(idSet);
-      const fullData = await _sp?.web.lists.getByTitle("Deccox Export Full Source").items.top(2000)();
-      const newFullData = fullData?.map((i: IDeccox_Export_Full_Source) => [i.Title, i.file]);
-      const filteredFullData = newFullData?.filter((item) => idSet.has(item[0]));
-      console.log(filteredFullData);
-      setDocuments(filteredFullData || []);
+  
+      // Create a Set of unique IDs from filtered data
+      const idSet = new Set(filteredData?.map(item => item[2]) || []);
+      console.log(`Unique IDs:`, idSet);
+  
+      // Map the full data
+      const newFullData = fullData?.map((i: IDeccox_Export_Full_Source) => [
+        i.Title,
+        i.file
+      ]);
+  
+      // Filter the full data based on idSet
+      const filteredFullData = newFullData?.filter(item => idSet.has(item[0]));
+      console.log(`Filtered Full Data:`, filteredFullData);
+  
+      // Update the state with the filtered documents
+      setDocuments(filteredData || []);
     } catch (err) {
-      console.log(err);
+      console.error("Error fetching and processing data:", err);
     }
-  }
+  };
+  
 
   const handleSearchInputChange = (event: any) => {
     setSearchQuery(event.target.value);
