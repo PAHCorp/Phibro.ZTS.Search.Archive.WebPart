@@ -12,6 +12,12 @@
   },
   "typescript.tsdk": ".\\node_modules\\typescript\\lib",
   "cSpell.words": [
+    "additionalaudiencescnamev",
+    "brandname",
+    "companycnamev",
+    "countryiescnamev",
+    "intendedspeciesc",
+    "languagev",
     "newdata",
     "SPFI"
   ]

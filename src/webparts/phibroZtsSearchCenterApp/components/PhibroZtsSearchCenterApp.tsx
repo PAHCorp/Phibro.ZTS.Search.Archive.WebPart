@@ -31,7 +31,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             .top(2000)(),
           _sp.web.lists
             .getByTitle("Deccox Export Full Source")
-            .items.select("Title", "file")
+            .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev")
             .top(2000)()
         ]);
         console.log(fetchedExportData);
@@ -48,22 +48,6 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
   const getItem = async () => {
     try {
-      console.log(`Fetched ${binderData?.length} items from DECCOX Binder 6 Percent`);
-  
-      // Map the necessary fields
-      const newdata = binderData?.map((i: IDECCOX_Binder_6_Percent) => [
-        i.field_1,
-        i.field_2,
-        i.field_3,
-        i.field_4
-      ]);
-
-      const past_data = exportData?.map((i: IDeccox_Export_Full_Source) => [
-        i.Title,
-        i.file
-      ]);
-      console.log(past_data);
-  
       // Prepare the search words set (case-insensitive)
       const wordsSet = new Set(
         searchQuery
@@ -74,8 +58,8 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       const wordsArray = Array.from(wordsSet);
   
       // Filter data based on search words
-      const filteredData = newdata?.filter(item => {
-        const fieldValue = item[1]?.toLowerCase() || "";
+      const filteredData = binderData?.filter(item => {
+        const fieldValue = item.field_2?.toLowerCase() || "";
         for (let word of wordsArray) {
           if (fieldValue.includes(word)) {
             return true;
@@ -85,12 +69,12 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       });
   
       // Create a Set of unique IDs from filtered data
-      const idSet = new Set(filteredData?.map(item => item[2]) || []);
+      const idSet = new Set(filteredData?.map(item => item.field_3) || []);
       console.log(`Unique IDs:`, idSet);
 
   
       // Filter the full data based on idSet
-      const filteredFullData = past_data?.filter(item => idSet.has(item[0]));
+      const filteredFullData = exportData?.filter(item => idSet.has(item.Title));
       console.log(`Filtered Full Data:`, filteredFullData);
   
       // Update the state with the filtered documents

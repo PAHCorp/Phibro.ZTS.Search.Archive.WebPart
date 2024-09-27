@@ -7,11 +7,6 @@ export interface IFAQ {
 
 export interface IDECCOX_Binder_6_Percent {
     Id: number;
-    "Order#": string;
-    NodeType: string;
-    NodeName: string;
-    DocumentID: string;
-    "Level#": number
     field_1: string;
     field_2: string;
     field_3: string;
@@ -21,4 +16,14 @@ export interface IDECCOX_Binder_6_Percent {
 export interface IDeccox_Export_Full_Source {
     Title: string;
     file: string;
+    countryiescnamev: string;
+    intendedspeciesc: string
+    languagev: string;
+    additionalaudiencescnamev: string;
+    brandname1cnamev: string;
+    companycnamev: string;
+}
+
+export interface IDocumentListProps {
+    docs: any[];
 }

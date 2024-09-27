@@ -2,14 +2,19 @@ import * as React from 'react';
 import styles from './PhibroZtsSearchCenterApp.module.scss';
 import { useState } from 'react';
 
-interface IDocumentListProps {
-  docs: any[]; // Replace with the actual type of your document items
-}
+import { IDocumentListProps } from '../../../interfaces';
 
-const DocumentList: React.FC<IDocumentListProps> = (props) => {
+
+const DocumentList: React.FC<IDocumentListProps> = (props: IDocumentListProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 14; // Change the items per page to 14
+
+//   const colorMapping = {
+//     'section': 'yellow',
+//     'document': 'green',
+//     'binder': 'blue'
+//   }
 
   // Function to toggle expansion
   const toggleExpansion = (index: number) => {
@@ -37,10 +42,10 @@ const DocumentList: React.FC<IDocumentListProps> = (props) => {
     <div>
       <ul className={styles['document-list']}>
         {currentItems.map((item, index) => (
-          <li key={index} className={styles['document-item']}>
+          <li key={index} className={styles['document-item']} >
             <div className={styles['document-row']}>
-              <a href={`https://pahc.sharepoint.com/sites/Zoetis-Regulatory/Shared%20Documents/Zoetis%20Upload/Deccox${item[1]}`}>
-                {item[0]}
+              <a href={`https://pahc.sharepoint.com/sites/Zoetis-Regulatory/Shared%20Documents/Zoetis%20Upload/Deccox${item.file}`}>
+                {item.Title}
               </a>
               <button onClick={() => toggleExpansion(index)} className={styles['arrow-button']}>
                 {expandedIndex === index ? '▲' : '▼'} {/* Arrow button */}
@@ -48,13 +53,25 @@ const DocumentList: React.FC<IDocumentListProps> = (props) => {
             </div>
             {expandedIndex === index && (
               <div className={styles['additional-details']}>
-                <p>Details about {item[0]}</p>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <p><strong>Country:</strong> {item.countryiescnamev}</p>
+                    <p><strong>Intended Species:</strong> {item.intendedspeciesc}</p>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <p><strong>Additional Audience:</strong> {item.additionalaudiencescnamev}</p>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <p><strong>Brand Name:</strong> {item.brandname1cnamev}</p>
+                    <p><strong>Company:</strong> {item.companycnamev}</p>
+                  </div>
+                </div>
               </div>
             )}
           </li>
         ))}
       </ul>
-      <div className={styles['pagination-controls']} style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+      <div className={styles['pagination-controls']} >
         <button onClick={handlePrevious} disabled={currentPage === 0}>Previous</button>
         <button onClick={handleNext} disabled={(currentPage + 1) * itemsPerPage >= props.docs.length}>Next</button>
       </div>
