@@ -123,14 +123,15 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
       {/* Right Column: Search and Documents */}
       <div className={styles["right-column"]}>
-        <div>
+        <div style={{display: 'flex', gap: '10px'}}>
           <SearchBox
           id='searchBoxValue'
           onChange={handleSearchInputChange}
           onKeyDown={handleKeyDown}
           placeholder='Search...'
+          style={{ width: '400px' }}
           />
-          <button onClick={getItem}>Search</button>
+          <button onClick={getItem} style={{ padding: '8px 16px'}} >Search</button>
         </div>
         <ul className={styles['document-list']}>
         {documents &&

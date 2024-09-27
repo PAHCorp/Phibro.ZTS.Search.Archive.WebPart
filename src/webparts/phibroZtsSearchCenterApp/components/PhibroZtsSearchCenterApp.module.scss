@@ -154,3 +154,17 @@
   background-color: #f9f9f9; /* Optional background */
   border: 1px solid #ddd; /* Optional border */
 }
+
+.search-container {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+  gap: 10px; /* Adjust spacing between the SearchBox and button */
+}
+
+.search-box {
+  width: 300px; /* Adjust the width as needed */
+}
+
+.search-button {
+  padding: 8px 16px; /* Adjust button padding as needed */
+}
