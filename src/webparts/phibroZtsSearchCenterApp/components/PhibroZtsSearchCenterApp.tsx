@@ -80,6 +80,9 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
         if (searchQuery && item.countryiescnamev && searchQuery.toLowerCase().includes(item.countryiescnamev.toLowerCase())) {
           return true;
         }
+        if (searchQuery && searchQuery === item.Title) {
+          return true;
+        }
         // if (searchQuery.includes)
         return false;
       });
