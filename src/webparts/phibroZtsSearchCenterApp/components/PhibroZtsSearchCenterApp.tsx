@@ -73,7 +73,16 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       const idSet = new Set(filteredData?.map(item => item.field_3) || []);
   
       // Filter the full data based on idSet
-      const filteredFullData = tempExportData?.filter(item => idSet.has(item.Title));
+      const filteredFullData = tempExportData?.filter(item => {
+        if (idSet.has(item.Title)) {
+          return true;
+        }
+        if (searchQuery && item.countryiescnamev && searchQuery.toLowerCase().includes(item.countryiescnamev.toLowerCase())) {
+          return true;
+        }
+        // if (searchQuery.includes)
+        return false;
+      });
   
       // Update the state with the filtered documents
       setDocuments(filteredFullData || []);
