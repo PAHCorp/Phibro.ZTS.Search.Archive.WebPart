@@ -23,6 +23,7 @@ export interface IDeccox_Export_Full_Source {
     brandname1cnamev: string;
     companycnamev: string;
     namev: string;
+    legacyversionc: string
 }
 
 export interface IDocumentListProps {

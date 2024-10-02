@@ -31,10 +31,11 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             .top(2000)(),
           _sp.web.lists
             .getByTitle("Deccox Export Full Source")
-            .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev", "namev")
+            .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev", "namev", "legacyversionc")
             .top(2000)()
         ]);
         // Set the fetched data to state
+        console.log(fetchedExportData);
         setBinderData(fetchedBinderData);
         setExportData(fetchedExportData);
       } catch (error) {
