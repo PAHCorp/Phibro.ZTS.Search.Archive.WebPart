@@ -45,7 +45,7 @@ const DocumentList: React.FC<IDocumentListProps> = (props: IDocumentListProps) =
           <li key={index} className={styles['document-item']} >
             <div className={styles['document-row']}>
               <a href={`https://pahc.sharepoint.com/sites/Zoetis-Regulatory/Shared%20Documents/Zoetis%20Upload/Deccox${item.file}`}>
-                {item.Title}
+                {item.namev}
               </a>
               <button onClick={() => toggleExpansion(index)} className={styles['arrow-button']}>
                 {expandedIndex === index ? '▲' : '▼'} {/* Arrow button */}
@@ -60,6 +60,7 @@ const DocumentList: React.FC<IDocumentListProps> = (props: IDocumentListProps) =
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                     <p><strong>Additional Audience:</strong> {item.additionalaudiencescnamev}</p>
+                    <p><strong>Document ID:</strong> {item.Title}</p>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                     <p><strong>Brand Name:</strong> {item.brandname1cnamev}</p>

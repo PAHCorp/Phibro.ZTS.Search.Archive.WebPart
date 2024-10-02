@@ -22,6 +22,7 @@ export interface IDeccox_Export_Full_Source {
     additionalaudiencescnamev: string;
     brandname1cnamev: string;
     companycnamev: string;
+    namev: string;
 }
 
 export interface IDocumentListProps {
