@@ -42,7 +42,7 @@ const DocumentList: React.FC<IDocumentListProps> = (props: IDocumentListProps) =
     <div>
       <ul className={styles['document-list']}>
         {currentItems.map((item, index) => (
-          <li key={index} className={styles['document-item']} >
+          <li key={index} className={styles['document-item']}  onClick={() => toggleExpansion(index)}>
             <div className={styles['document-row']}>
               <a href={`https://pahc.sharepoint.com/sites/Zoetis-Regulatory/Shared%20Documents/Zoetis%20Upload/Deccox${item.file}`} target="_blank">
                 {item.namev}
