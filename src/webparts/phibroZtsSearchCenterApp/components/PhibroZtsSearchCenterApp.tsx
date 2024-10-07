@@ -23,6 +23,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
   const [products, setProducts] = useState<IDECCOX_Binder_6_Percent[]>();
   
 
+  // This function convert the flat binder data into unflat JSON structure to connect it to the children inside it.
   function flatToHierarchy (flat: Object[]) {
 
     var roots: IDECCOX_Binder_6_Percent[] = [] // things without parent
@@ -52,6 +53,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     return roots
   }
 
+  // This loads the data from sharepoint lists whenever the page loads.
   useEffect(() => {
     const fetchData = async () => {
       if (!_sp) return; // Ensure _sp is available before fetching
@@ -67,9 +69,10 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev", "namev", "legacyversionc")
             .top(2000)()
         ]);
-        // Set the fetched data to state
+        // Sort the fetched Binder Data
         let sortedBinderData = fetchedBinderData.sort((n1, n2) => n1.OrderNumber - n2.OrderNumber);
 
+        // The below code is to store the parent of each item. In other words, parent is the directory/folder that the item is inside.
         let parents = [null];
         for (let i = 0; i < sortedBinderData.length; i++) {
           sortedBinderData[i]["id"] = sortedBinderData[i]["OrderNumber"]
@@ -84,6 +87,7 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
           }
         }
       
+
         let recursiveArray = flatToHierarchy(sortedBinderData);
         setProducts(recursiveArray);
         console.log(fetchedExportData);
