@@ -5,7 +5,7 @@ import { SearchBox } from '@fluentui/react-components';
 import { useState, useEffect, useCallback } from 'react';
 import { SPFI } from '@pnp/sp';
 import { getSP } from '../../../pnpConfig';
-import { IDECCOX_Binder_6_Percent } from '../../../interfaces';
+import { IDECCOX_Binder_6_Percent, IDeccox_Export_Full_Source } from '../../../interfaces';
 import TreeView, { TreeViewTypes } from "devextreme-react/tree-view";
 // import DocumentList from './DocumentList';
 
@@ -32,12 +32,12 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     var all: { [key: string]: IDECCOX_Binder_6_Percent } = {};
 
     flat.forEach(function(item: IDECCOX_Binder_6_Percent) {
-      all[item.uniqueID] = item;
+      all[item.OrderNumber] = item;
     })
 
     // connect items to its parent, and split roots apart
-    Object.keys(all).forEach(function (uniqueID) {
-        var item = all[uniqueID];
+    Object.keys(all).forEach(function (OrderNumber) {
+        var item = all[OrderNumber];
         if (item.parent === null) {
             roots.push(item);
         } else if (item.parent in all) {
@@ -66,9 +66,16 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             .top(2000)(),
           _sp.web.lists
             .getByTitle("Deccox Export Full Source")
-            .items.select("Title", "file", "countryiescnamev", "intendedspeciesc", "languagev", "additionalaudiencescnamev", "brandname1cnamev", "companycnamev", "namev", "legacyversionc")
+            .items
             .top(2000)()
         ]);
+
+        let mapping: { [key: string]: IDeccox_Export_Full_Source } = {};
+        for (let i = 0; i < fetchedExportData.length; i++) {
+          mapping[fetchedExportData[i]['Title']] = fetchedExportData[i];
+        }
+
+
         // Sort the fetched Binder Data
         let sortedBinderData = fetchedBinderData.sort((n1, n2) => n1.OrderNumber - n2.OrderNumber);
 
@@ -76,21 +83,31 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
         let parents = [null];
         for (let i = 0; i < sortedBinderData.length; i++) {
           sortedBinderData[i]["id"] = sortedBinderData[i]["OrderNumber"]
-          sortedBinderData[i]["uniqueID"] = sortedBinderData[i]["OrderNumber"] + sortedBinderData[i]["field_2"]
           sortedBinderData[i]["text"] = sortedBinderData[i]["field_2"];
           if (parents.length == sortedBinderData[i]["field_4"]) {
-            parents.push(sortedBinderData[i]["OrderNumber"] + sortedBinderData[i]["field_2"])
+            parents.push(sortedBinderData[i]["OrderNumber"])
             sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
           } else {
             sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
-            parents[sortedBinderData[i]["field_4"]] = sortedBinderData[i]["OrderNumber"] + sortedBinderData[i]["field_2"]
+            parents[sortedBinderData[i]["field_4"]] = sortedBinderData[i]["OrderNumber"]
           }
+
+          if (sortedBinderData[i].field_1 !== 'section') {
+            for (let [key, value] of Object.entries(mapping[sortedBinderData[i].field_3])) {
+              sortedBinderData[i][key] = value;
+            }
+          }
+
+          delete sortedBinderData[i]["odata.type"];
+          delete sortedBinderData[i]["odata.id"];
+          delete sortedBinderData[i]["odata.etag"];
+          delete sortedBinderData[i]["odata.editLink"];
         }
       
 
         let recursiveArray = flatToHierarchy(sortedBinderData);
+        console.log(recursiveArray);
         setProducts(recursiveArray);
-        console.log(fetchedExportData);
         // setBinderData(fetchedBinderData);
         // setExportData(fetchedExportData);
       } catch (error) {

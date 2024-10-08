@@ -21,7 +21,7 @@
       "webpack-env"
     ],
     "lib": [
-      "es2015",
+      "es2017",
       "dom"
     ]
   },
