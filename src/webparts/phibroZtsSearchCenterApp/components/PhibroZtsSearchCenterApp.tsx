@@ -2,12 +2,17 @@ import * as React from 'react';
 import styles from './PhibroZtsSearchCenterApp.module.scss';
 import type { IPhibroZtsSearchCenterAppProps } from './IPhibroZtsSearchCenterAppProps';
 import { SearchBox } from '@fluentui/react-components';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { SPFI } from '@pnp/sp';
 import { getSP } from '../../../pnpConfig';
-import { IDECCOX_Binder_6_Percent, IDeccox_Export_Full_Source } from '../../../interfaces';
-import TreeView, { TreeViewTypes } from "devextreme-react/tree-view";
+import { IDECCOX_Binder_6_Percent } from '../../../interfaces';
+// import TreeView, { TreeViewTypes } from "devextreme-react/tree-view";
 // import DocumentList from './DocumentList';
+
+interface hehe {
+  filePath: string;
+  country: string;
+}
 
 const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (props: IPhibroZtsSearchCenterAppProps) => {
 
@@ -15,12 +20,12 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
   const [_sp, _] = useState<SPFI | null>(getSP(props.context));
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [__, setCurrentItem] = useState({  });
+  // const [__, setCurrentItem] = useState({  });
 
   // const [binderData, setBinderData] = useState<IDECCOX_Binder_6_Percent[]>([]);
   // const [exportData, setExportData] = useState<IDeccox_Export_Full_Source[]>([]);
 
-  const [products, setProducts] = useState<IDECCOX_Binder_6_Percent[]>();
+  // const [products, setProducts] = useState<IDECCOX_Binder_6_Percent[]>();
   
 
   // This function convert the flat binder data into unflat JSON structure to connect it to the children inside it.
@@ -32,20 +37,20 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     var all: { [key: string]: IDECCOX_Binder_6_Percent } = {};
 
     flat.forEach(function(item: IDECCOX_Binder_6_Percent) {
-      all[item.OrderNumber] = item;
+      all[item.key] = item;
     })
 
     // connect items to its parent, and split roots apart
-    Object.keys(all).forEach(function (OrderNumber) {
-        var item = all[OrderNumber];
+    Object.keys(all).forEach(function (key) {
+        var item = all[key];
         if (item.parent === null) {
             roots.push(item);
         } else if (item.parent in all) {
             var p = all[item.parent]
-            if (!('items' in p)) {
-                p.items = [];
+            if (!('children' in p)) {
+                p.children = [];
             }
-            p.items?.push(item);
+            p.children?.push(item);
         }
     })
 
@@ -59,55 +64,89 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
       if (!_sp) return; // Ensure _sp is available before fetching
 
       try {
-        const [fetchedBinderData, fetchedExportData] = await Promise.all([
-          _sp.web.lists
-            .getByTitle("DECCOX Binder 6 Percent")
-            .items.select("OrderNumber", "field_1", "field_2", "field_3", "field_4")
-            .top(2000)(),
+        const [fetchedExportData, fetchedBinderData] = await Promise.all([
           _sp.web.lists
             .getByTitle("Deccox Export Full Source")
             .items
+            .top(2000)(),
+          _sp.web.lists
+            .getByTitle("Binders")
+            .items
+            .select("Title", "NodeName", "NodeType", "Level0", "DocumentID", "LevelNumber", "OrderNumDig")
             .top(2000)()
         ]);
 
-        let mapping: { [key: string]: IDeccox_Export_Full_Source } = {};
+        console.log(fetchedExportData);
+
+        let mapping: { [key: string]: hehe } = {};
         for (let i = 0; i < fetchedExportData.length; i++) {
-          mapping[fetchedExportData[i]['Title']] = fetchedExportData[i];
+          mapping[fetchedExportData[i]['Title']] = {
+            "filePath": fetchedExportData[i]["file"],
+            "country": fetchedExportData[i]["countryiescnamev"]
+          };
         }
+
+        for (let i = 0; i < fetchedBinderData.length; i++) {
+          fetchedBinderData[i]["OrderNumDig"] = Number(fetchedBinderData[i]["OrderNumDig"]);
+        }
+        console.log(fetchedBinderData);
 
 
         // Sort the fetched Binder Data
-        let sortedBinderData = fetchedBinderData.sort((n1, n2) => n1.OrderNumber - n2.OrderNumber);
+        let sortedBinderData1 = fetchedBinderData.sort((n1, n2) => n1.OrderNumDig - n2.OrderNumDig);
+        console.log(sortedBinderData1);
+        let sortedBinderData = sortedBinderData1.map(item => item);
 
         // The below code is to store the parent of each item. In other words, parent is the directory/folder that the item is inside.
-        let parents = [null];
+        let parents = ["294997-00000"];
         for (let i = 0; i < sortedBinderData.length; i++) {
-          sortedBinderData[i]["id"] = sortedBinderData[i]["OrderNumber"]
-          sortedBinderData[i]["text"] = sortedBinderData[i]["field_2"];
-          if (parents.length == sortedBinderData[i]["field_4"]) {
-            parents.push(sortedBinderData[i]["OrderNumber"])
-            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
+          sortedBinderData[i]["key"] = sortedBinderData[i]["Title"];
+          sortedBinderData[i]["label"] = sortedBinderData[i]["NodeName"] || sortedBinderData[i]["Level0"];
+          sortedBinderData[i]["selectable"] = true;
+          sortedBinderData[i]["data"] = {
+            "searchText": sortedBinderData[i]["label"],
+            "documentId": sortedBinderData[i]["DocumentID"],
+            "filePath": mapping[sortedBinderData[i]["DocumentID"]]?.["filePath"] || "",
+            "country": mapping[sortedBinderData[i]["DocumentID"]]?.["country"] || "",
+            "category": "Regulatory",
+            "nodetype": sortedBinderData[i]["NodeType"]
+          }
+          sortedBinderData[i]["iconProps"] = {
+            "iconName": sortedBinderData[i]["NodeType"] === "document" ? "Document" : "Folder"
+          }
+          sortedBinderData[i]["LevelNumber"] = Number(sortedBinderData[i]["LevelNumber"]);
+
+          if (sortedBinderData[i]["LevelNumber"] > 0) {
+            if (parents.length === sortedBinderData[i]["LevelNumber"]) {
+              parents.push(sortedBinderData[i]["key"]);
+              sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["LevelNumber"] - 1];
+            } else {
+              sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["LevelNumber"] - 1];
+              parents[sortedBinderData[i]["LevelNumber"]] = sortedBinderData[i]["key"];
+            }
           } else {
-            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
-            parents[sortedBinderData[i]["field_4"]] = sortedBinderData[i]["OrderNumber"]
+            sortedBinderData[i]["parent"] = null;
           }
 
-          if (sortedBinderData[i].field_1 !== 'section') {
-            for (let [key, value] of Object.entries(mapping[sortedBinderData[i].field_3])) {
-              sortedBinderData[i][key] = value;
-            }
-          }
 
           delete sortedBinderData[i]["odata.type"];
           delete sortedBinderData[i]["odata.id"];
           delete sortedBinderData[i]["odata.etag"];
           delete sortedBinderData[i]["odata.editLink"];
+          delete sortedBinderData[i]["Title"];
+          delete sortedBinderData[i]["NodeName"];;
+          delete sortedBinderData[i]["NodeType"];
+          delete sortedBinderData[i]["DocumentID"];
+          delete sortedBinderData[i]["Level0"];
+          delete sortedBinderData[i]["LevelNumber"];
+          delete sortedBinderData[i]["OrderNumDig"];
         }
+        console.log(sortedBinderData);
       
 
         let recursiveArray = flatToHierarchy(sortedBinderData);
         console.log(recursiveArray);
-        setProducts(recursiveArray);
+        // setProducts(recursiveArray);
         // setBinderData(fetchedBinderData);
         // setExportData(fetchedExportData);
       } catch (error) {
@@ -180,12 +219,12 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
     }
   };
 
-  const selectItem = useCallback(
-    (e: TreeViewTypes.ItemClickEvent & { itemData?: IDECCOX_Binder_6_Percent }) => {
-      setCurrentItem({ ...e.itemData });
-    },
-    [setCurrentItem]
-  );
+  // const selectItem = useCallback(
+  //   (e: TreeViewTypes.ItemClickEvent & { itemData?: IDECCOX_Binder_6_Percent }) => {
+  //     setCurrentItem({ ...e.itemData });
+  //   },
+  //   [setCurrentItem]
+  // );
 
 
   return (
@@ -209,13 +248,13 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
           <button onClick={getItem} style={{ padding: '8px 16px'}} >Search</button>
         </div>
         <div className="form">
-          <TreeView
+          {/* <TreeView
             id="simple-treeview"
             className={styles['document-list']}
             items={products}
             width="100%"
             onItemClick={selectItem}
-          />
+          /> */}
         </div>
       </div>
     </div>
