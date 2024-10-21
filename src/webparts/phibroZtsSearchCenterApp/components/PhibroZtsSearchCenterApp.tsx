@@ -5,9 +5,8 @@ import { SearchBox } from '@fluentui/react-components';
 import { useState, useEffect, useCallback } from 'react';
 import { SPFI } from '@pnp/sp';
 import { getSP } from '../../../pnpConfig';
-import { IDECCOX_Binder_6_Percent, IDeccox_Export_Full_Source } from '../../../interfaces';
+import { IDECCOX_Binder_6_Percent } from '../../../interfaces';
 import TreeView, { TreeViewTypes } from "devextreme-react/tree-view";
-// import DocumentList from './DocumentList';
 
 const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (props: IPhibroZtsSearchCenterAppProps) => {
 
@@ -17,8 +16,6 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
 
   const [__, setCurrentItem] = useState({  });
 
-  // const [binderData, setBinderData] = useState<IDECCOX_Binder_6_Percent[]>([]);
-  // const [exportData, setExportData] = useState<IDeccox_Export_Full_Source[]>([]);
 
   const [products, setProducts] = useState<IDECCOX_Binder_6_Percent[]>();
   
@@ -57,23 +54,14 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
   useEffect(() => {
     const fetchData = async () => {
       if (!_sp) return; // Ensure _sp is available before fetching
-
       try {
-        const [fetchedBinderData, fetchedExportData] = await Promise.all([
+        const [fetchedBinderData] = await Promise.all([
           _sp.web.lists
-            .getByTitle("DECCOX Binder 6 Percent")
-            .items.select("OrderNumber", "field_1", "field_2", "field_3", "field_4")
-            .top(2000)(),
-          _sp.web.lists
-            .getByTitle("Deccox Export Full Source")
+            .getByTitle("Regulatory - Binders")
             .items
             .top(2000)()
         ]);
-
-        let mapping: { [key: string]: IDeccox_Export_Full_Source } = {};
-        for (let i = 0; i < fetchedExportData.length; i++) {
-          mapping[fetchedExportData[i]['Title']] = fetchedExportData[i];
-        }
+        console.log(fetchedBinderData);
 
 
         // Sort the fetched Binder Data
@@ -82,34 +70,22 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
         // The below code is to store the parent of each item. In other words, parent is the directory/folder that the item is inside.
         let parents = [null];
         for (let i = 0; i < sortedBinderData.length; i++) {
-          sortedBinderData[i]["id"] = sortedBinderData[i]["OrderNumber"]
-          sortedBinderData[i]["text"] = sortedBinderData[i]["field_2"];
-          if (parents.length == sortedBinderData[i]["field_4"]) {
+          sortedBinderData[i]["id"] = sortedBinderData[i]["OrderNumber"];
+          sortedBinderData[i]["text"] = sortedBinderData[i]["NodeName"];
+          if (parents.length == sortedBinderData[i]["LevelNumber"]) {
             parents.push(sortedBinderData[i]["OrderNumber"])
-            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
+            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["LevelNumber"] - 1]
           } else {
-            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["field_4"] - 1]
-            parents[sortedBinderData[i]["field_4"]] = sortedBinderData[i]["OrderNumber"]
+            sortedBinderData[i]["parent"] = parents[sortedBinderData[i]["LevelNumber"] - 1]
+            parents[sortedBinderData[i]["LevelNumber"]] = sortedBinderData[i]["OrderNumber"]
           }
 
-          if (sortedBinderData[i].field_1 !== 'section') {
-            for (let [key, value] of Object.entries(mapping[sortedBinderData[i].field_3])) {
-              sortedBinderData[i][key] = value;
-            }
-          }
-
-          delete sortedBinderData[i]["odata.type"];
-          delete sortedBinderData[i]["odata.id"];
-          delete sortedBinderData[i]["odata.etag"];
-          delete sortedBinderData[i]["odata.editLink"];
         }
-      
+        console.log(sortedBinderData);
 
         let recursiveArray = flatToHierarchy(sortedBinderData);
-        console.log(recursiveArray);
         setProducts(recursiveArray);
-        // setBinderData(fetchedBinderData);
-        // setExportData(fetchedExportData);
+        console.log(products);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -121,48 +97,6 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
   const getItem = async () => {
     try {
       console.log(searchQuery);
-      // let tempBinderData = binderData.map(item=>item);
-      // let tempExportData = exportData.map(item=>item);
-      // // Prepare the search words set (case-insensitive)2az
-      // const wordsSet = new Set(
-      //   searchQuery
-      //     .split(" ")
-      //     .map(word => word.trim().toLowerCase())
-      //     .filter(word => word.length > 0) // Remove empty strings
-      // );
-      // const wordsArray = Array.from(wordsSet);
-  
-      // Filter data based on search words
-      // const filteredData = tempBinderData?.filter(item => {
-      //   const fieldValue = item.field_2?.toLowerCase() || "";
-      //   for (let word of wordsArray) {
-      //     if (fieldValue.includes(word)) {
-      //       return true;
-      //     }
-      //   }
-      //   return false;
-      // });
-  
-      // Create a Set of unique IDs from filtered data
-      // const idSet = new Set(filteredData?.map(item => item.field_3) || []);
-  
-      // // Filter the full data based on idSet
-      // const filteredFullData = tempExportData?.filter(item => {
-      //   if (idSet.has(item.Title)) {
-      //     return true;
-      //   }
-      //   if (searchQuery && item.countryiescnamev && searchQuery.toLowerCase().includes(item.countryiescnamev.toLowerCase())) {
-      //     return true;
-      //   }
-      //   if (searchQuery && searchQuery === item.Title) {
-      //     return true;
-      //   }
-      //   // if (searchQuery.includes)
-      //   return false;
-      // });
-  
-      // Update the state with the filtered documents
-      // setDocuments(filteredFullData || []);
     } catch (err) {
       console.error("Error fetching and processing data:", err);
     }
@@ -215,6 +149,8 @@ const PhibroZtsSearchCenterApp: React.FC<IPhibroZtsSearchCenterAppProps> = (prop
             items={products}
             width="100%"
             onItemClick={selectItem}
+            searchEnabled={true}
+            searchExpr={['Keyword']}
           />
         </div>
       </div>
